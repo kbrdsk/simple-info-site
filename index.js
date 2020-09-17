@@ -1,40 +1,21 @@
-const http = require("http");
 const fs = require("fs");
+const express = require("express");
 const util = require("util");
 
+const app = express();
 const readFile = util.promisify(fs.readFile);
 
-function requestListener(req, res) {
-	const validPath =
-		req.url === "/"
-			? "./index.html"
-			: req.url === "/about" || req.url === "/contact-me"
-			? `.${req.url}.html`
-			: null;
-	if (!validPath) respond404(res);
-	else
-		readFile(validPath)
-			.catch((error) => {
-				console.log(error);
-			})
-			.then((data) => {
-				console.log("success");
-				respondSuccess(res, data);
-			});
+app.use(check404);
+app.get("/", fileDelivery("./index.html"));
+app.get("/about", fileDelivery("./about.html"));
+app.get("/contact-me", fileDelivery("./contact-me.html"));
+app.listen(8080);
+
+async function check404(req, res, next) {
+	if (["/", "/about", "/contact-me"].includes(req.url)) next();
+	else res.end(await readFile("./404.html"));
 }
 
-function respondSuccess(res, data) {
-	res.writeHead(200, { "Content-Type": "text/html" });
-	res.write(data);
-	res.end();
+function fileDelivery(filepath, res) {
+	return async (req, res) => res.end(await readFile(filepath));
 }
-
-function respond404(res) {
-	readFile("./404.html").then((data) => {
-		res.writeHead(404, { "Content-Type": "text/html" });
-		res.write(data);
-		res.end();
-	});
-}
-
-http.createServer(requestListener).listen(8080);
