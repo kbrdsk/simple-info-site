@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/kbrdsk/simple-info-site/issues"
   },
-  "homepage": "https://github.com/kbrdsk/simple-info-site#readme"
+  "homepage": "https://github.com/kbrdsk/simple-info-site#readme",
+  "devDependencies": {
+    "express": "^4.17.1"
+  }
 }
