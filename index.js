@@ -5,16 +5,28 @@ const util = require("util");
 const readFile = util.promisify(fs.readFile);
 
 function requestListener(req, res) {
-	const filename = `.${req.url}.html`;
-	readFile(filename)
-		.catch((error) => {
-			console.log(error);
-			respond404(res);
-		})
-		.then(() => {
-			console.log("success");
-			res.end();
-		});
+	const validPath =
+		req.url === "/"
+			? "./index.html"
+			: req.url === "/about" || req.url === "/contact-me"
+			? `.${req.url}.html`
+			: null;
+	if (!validPath) respond404(res);
+	else
+		readFile(validPath)
+			.catch((error) => {
+				console.log(error);
+			})
+			.then((data) => {
+				console.log("success");
+				respondSuccess(res, data);
+			});
+}
+
+function respondSuccess(res, data) {
+	res.writeHead(200, { "Content-Type": "text/html" });
+	res.write(data);
+	res.end();
 }
 
 function respond404(res) {
